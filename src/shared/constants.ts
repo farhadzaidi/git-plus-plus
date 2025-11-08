@@ -12,6 +12,7 @@ export const COMMANDS = {
 	// be able to interactively select commits?
 	// check out files from other branches easier
 	// auto set upstream?
+	// uncommit?
 	// simpler remote vs local differentiation
 	// Interaticely stage and unstage files
 	// wipe - show a dry run and ask to confirm

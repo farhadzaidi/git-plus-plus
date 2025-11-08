@@ -1,33 +1,25 @@
 import { execa } from 'execa';
 import { input } from '@inquirer/prompts';
 import chalk from 'chalk';
-import { processCommand } from '@/shared/helpers';
-import { EXIT } from '@/shared/constants';
+import { safePrompt, processCommand } from '@/shared/helpers';
 
 export async function execute(branch?: string): Promise<void> {
   // If the branch is provided, create it
   if (branch) {
     await createBranch(branch);
+    return;
   }
 
   // If the branch is not provided, prompt the user to enter a brach name
-  let newBranch: string | undefined = undefined;
-  try {
-    newBranch = await input({
-      message: chalk.cyan('Enter a name for the new branch (Ctrl + C to cancel)\n'),
-      required: true,
-      theme: {
-        style: {
-          answer: (text: string) => chalk.magenta(text),
-        }
+  const newBranch = await safePrompt(() => input({
+    message: chalk.cyan('Enter a name for the new branch (Ctrl + C to cancel)\n'),
+    required: true,
+    theme: {
+      style: {
+        answer: (text: string) => chalk.magenta(text),
       }
-    });
-  } catch (error: any) {
-    if (error.name === 'ExitPromptError') {
-      console.log(chalk.red('Operation cancelled'));
-      process.exit(EXIT.SUCCESS);
     }
-  }
+  }));
 
   if (newBranch) {
     await createBranch(newBranch);
