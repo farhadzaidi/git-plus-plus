@@ -1,0 +1,44 @@
+{
+  "name": "git-plus-plus",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "gpp": "dist/bin/gpp.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "description": "Extended Git Command Set",
+  "scripts": {
+    "dev": "tsx bin/gpp.ts",
+    "build": "tsup bin/gpp.ts src/install.ts --format esm --clean",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "postinstall": "node dist/src/install",
+    "prepublishOnly": "pnpm build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.19.0",
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2",
+    "enquirer": "^2.4.1",
+    "execa": "^9.6.0",
+    "ini": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/ini": "^4.1.1",
+    "@types/node": "^24.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.3",
+    "@typescript-eslint/parser": "^8.46.3",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.6"
+  }
+}
