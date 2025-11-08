@@ -10,13 +10,13 @@
   ],
   "description": "Extended Git Command Set",
   "scripts": {
-    "dev": "tsx bin/gpp.ts",
-    "build": "tsup bin/gpp.ts src/install.ts --format esm --clean",
+    "dev": "tsx ./bin/gpp.ts",
+    "build": "tsup ./bin/gpp.ts --format esm --clean",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "postinstall": "node dist/src/install",
+    "postinstall": "tsx ./install",
     "prepublishOnly": "pnpm build"
   },
   "keywords": [],

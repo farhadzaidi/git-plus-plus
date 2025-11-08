@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 
 import { GPP, COMMANDS } from '@/shared/constants';
-import { rebuild, goto } from '@/commands';
+import { rebuild, goto, create } from '@/commands';
 
 const program = new Command();
 
@@ -15,12 +15,23 @@ program
 	.action(rebuild);
 
 program
-	.command(`${COMMANDS.GOTO} [branch]`)
+	.command(COMMANDS.GOTO)
+	.argument('[branch', 'Branch to switch to')
 	.description(
 		'Switches to the provided branch if provided. Otherwise, opens up the interactive branch selector.'
 	)
-	.action((branch) => {
+	.action((branch?: string) => {
 		goto(branch);
+	});
+
+program
+	.command(COMMANDS.CREATE)
+	.argument('[branch', 'Name of newly created branch')
+	.description(
+		'Creates a new branch from the current one using the specified name.'
+	)
+	.action((branch?: string) => {
+		create(branch);
 	});
 
 program.parse();

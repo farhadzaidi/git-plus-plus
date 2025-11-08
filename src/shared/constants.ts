@@ -3,7 +3,7 @@ export const GPP = 'gpp';
 export const COMMANDS = {
 	REBUILD: 'rebuild',
 	GOTO: 'goto',
-	START: 'start', // replace checkout -b
+	CREATE: 'create', // replace checkout -b
 	PUBLISH: 'publish', // replace git add . && git commit -m "message" && git push
 	DELETE: 'delete', // remove a branch - enable interactivity
 	RENAME: 'rename', // rename a branch - enable interactivity

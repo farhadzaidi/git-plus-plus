@@ -4,7 +4,7 @@ import { select } from '@inquirer/prompts';
 import chalk from 'chalk';
 import { processCommand } from '@/shared/helpers';
 
-export async function execute(branch: string | undefined): Promise<void> {
+export async function execute(branch?: string): Promise<void> {
 	// If the branch is provided, switch to it (delegate to git)
 	if (branch) {
 		const result = await execa('git', ['switch', branch], { reject: false });
@@ -12,31 +12,38 @@ export async function execute(branch: string | undefined): Promise<void> {
 	}
 
 	// If the branch isn't provided, get all branches and prompt user to select one
-	const branches = await getAllBranches();
-	const answer = await select({
-		message: chalk.cyan('Select a branch: '),
-		choices: branches.map((b) => ({
-			name: b.isCurrent
-				? `${chalk.green('●')} ${b.name} ${chalk.dim.italic('(current)')}`
-				: `  ${b.name}`,
-			value: b.name,
-		})),
-		default: branches.find((b) => b.isCurrent)?.name,
-		theme: {
-			prefix: {
-				idle: chalk.cyan('❯'),
-				done: chalk.green('✓'),
+	const allBranches = await getAllBranches();
+	let selectedBranch: string | undefined = undefined;
+
+	try {
+		selectedBranch = await select({
+			message: chalk.cyan('Select a branch (Ctrl + C to cancel): '),
+			choices: allBranches.map((b) => ({
+				name: b.isCurrent
+					? `${chalk.green('●')} ${b.name} ${chalk.dim.italic('(current)')}`
+					: `  ${b.name}`,
+				value: b.name,
+			})),
+			default: allBranches.find((b) => b.isCurrent)?.name,
+			theme: {
+				style: {
+					highlight: (text: string) => chalk.magenta.bold(text),
+					answer: (text: string) => chalk.green(text),
+				},
 			},
-			style: {
-				highlight: (text: string) => chalk.magenta.bold(text),
-				answer: (text: string) => chalk.green(text),
-			},
-		},
-	});
+		});
+	} catch (error: any) {
+		if (error.name === 'ExitPromptError') {
+			console.log(chalk.red('Operation cancelled'));
+			process.exit(EXIT.SUCCESS);
+		}
+	}
 
 	// Switch to the selected branch
-	const result = await execa('git', ['switch', answer], { reject: false });
-	processCommand(result);
+	if (selectedBranch) {
+		const result = await execa('git', ['switch', selectedBranch], { reject: false });
+		processCommand(result);
+	}
 }
 
 async function getAllBranches() {
