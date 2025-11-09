@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 
 import { GPP, COMMANDS } from '@/shared/constants';
-import { rebuild, goto, create, publish } from '@/commands';
+import { rebuild, goto, create, publish, delete as deleteBranches } from '@/commands';
 
 const program = new Command();
 
@@ -40,6 +40,16 @@ program
   )
   .action((message?: string) => {
     publish(message);
+  });
+
+program
+  .command(COMMANDS.DELETE)
+  .argument('[branches...]', 'Branches to delete')
+  .description(
+    'Deletes the provided branches. Otherwise, opens up the interactive branch selector.'
+  )
+  .action((branches: string[]) => {
+    deleteBranches(branches);
   });
 
 program.parse();

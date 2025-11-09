@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import { confirm } from '@inquirer/prompts';
+import { execa } from 'execa';
 import { EXIT } from '@/shared/constants';
 
 export async function safePrompt<T>(promptFn: () => Promise<T>): Promise<T | null> {
@@ -26,6 +27,25 @@ export async function genericConfirmPrompt(): Promise<boolean | null> {
       },
     })
   );
+}
+
+export async function getAllBranches() {
+  try {
+    // List all branches via stdout
+    const { stdout } = await execa('git', ['--no-pager', 'branch']);
+
+    // Parse and return output
+    return stdout.split('\n').map((line) => {
+      line = line.trim();
+      return {
+        name: line.replace(/^\*\s*/, ''),
+        isCurrent: line.startsWith('*'),
+      };
+    });
+  } catch (error) {
+    console.log(chalk.red('Error: Failed to retrieve branches.'));
+    process.exit(EXIT.FAILURE);
+  }
 }
 
 export function processCommand(

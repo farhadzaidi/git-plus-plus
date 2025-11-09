@@ -1,8 +1,7 @@
-import { EXIT } from '@/shared/constants';
 import { execa } from 'execa';
 import { select } from '@inquirer/prompts';
 import chalk from 'chalk';
-import { safePrompt, processCommand } from '@/shared/helpers';
+import { safePrompt, getAllBranches, processCommand } from '@/shared/helpers';
 
 export async function execute(branch?: string): Promise<void> {
   // If the branch is provided, switch to it (delegate to git)
@@ -37,24 +36,5 @@ export async function execute(branch?: string): Promise<void> {
   if (selectedBranch) {
     const result = await execa('git', ['switch', selectedBranch], { reject: false });
     processCommand(result);
-  }
-}
-
-async function getAllBranches() {
-  try {
-    // List all branches via stdout
-    const { stdout } = await execa('git', ['--no-pager', 'branch']);
-
-    // Parse and return output
-    return stdout.split('\n').map((line) => {
-      line = line.trim();
-      return {
-        name: line.replace(/^\*\s*/, ''),
-        isCurrent: line.startsWith('*'),
-      };
-    });
-  } catch (error) {
-    console.log(chalk.red('Error: Failed to retrieve branches.'));
-    process.exit(EXIT.FAILURE);
   }
 }
