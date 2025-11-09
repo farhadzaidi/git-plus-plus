@@ -17,7 +17,7 @@ export async function execute(): Promise<void> {
   console.log(chalk.red.bold('\nWARNING: DESTRUCTIVE OPERATION'));
   console.log(
     chalk.red(
-      'This will permanently discard ALL uncommitted changes in your working directory and staging area.'
+      'This will permanently discard ALL uncommitted changes and untracked files in your working directory.'
     )
   );
   console.log(chalk.red('This operation cannot be undone.\n'));
@@ -25,7 +25,7 @@ export async function execute(): Promise<void> {
   // Ask user to type "confirm"
   const confirmation = await safePrompt(() =>
     input({
-      message: chalk.yellow('Type "confirm" to proceed'),
+      message: chalk.yellow('Type "confirm" to proceed (Ctrl + C to cancel): '),
       theme: {
         style: {
           answer: (text: string) => chalk.red(text),
@@ -35,13 +35,17 @@ export async function execute(): Promise<void> {
   );
 
   if (confirmation !== 'confirm') {
-    console.log(chalk.yellow('Operation cancelled'));
+    console.log(chalk.red('Operation cancelled'));
     return;
   }
 
-  // Execute Order 66
-  const result = await execa('git', ['reset', '--hard'], { reject: false });
-  processCommand(result);
+  // Reset all tracked changes
+  const resetResult = await execa('git', ['reset', '--hard'], { reject: false });
+  processCommand(resetResult);
 
-  console.log(chalk.green('\nWorking directory has been reset to HEAD'));
+  // Remove all untracked files and directories
+  const cleanResult = await execa('git', ['clean', '-fd'], { reject: false });
+  processCommand(cleanResult);
+
+  console.log(chalk.green('\nWorking directory has been wiped clean'));
 }

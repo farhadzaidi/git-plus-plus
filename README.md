@@ -80,7 +80,7 @@ Git is powerful but its CLI can be cumbersome. Git++ provides:
 
 **`git uncommit`** - Undo last commit, keeping changes staged. Useful for fixing commit messages or adding forgotten changes.
 
-**`git wipe`** - Discard all uncommitted changes (destructive). Requires typing "confirm" to proceed.
+**`git wipe`** - Discard all uncommitted changes and untracked files (destructive). Requires typing "confirm" to proceed.
 
 ---
 
