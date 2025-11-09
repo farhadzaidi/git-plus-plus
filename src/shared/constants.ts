@@ -12,7 +12,7 @@ export const COMMANDS = {
   DELETE: 'delete',
   RENAME: 'rename',
   TRACK: 'track',
-  UNCOMMIT: 'uncommit', // safe uncommit (git reset --soft HEAD~1)
+  UNCOMMIT: 'uncommit',
   PICK: 'pick', // choose from unstage (including untracked) files to stage - multiselect and confirm
   DROP: 'drop', // choose from staged files to unstage - multiselect and confirm
 
@@ -20,12 +20,6 @@ export const COMMANDS = {
   // --unstaged - interactively choose or specify (clean -fd)
   // --staged - interactively choose or specify (restore)
   // --all - git reset --hard
-
-  // go back to previous commit safely ?
-  // move to next commit ?
-  // be able to interactively select commits?
-  // check out files from other branches easier? (interactively?)
-  // simpler remote vs local differentiation (?)
 };
 
 export const GITCONFIG_ALIASES = {
