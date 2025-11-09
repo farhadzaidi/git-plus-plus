@@ -1,16 +1,10 @@
-# Git++ (gpp)
+# Git++ (`gpp`)
 
-An interactive extension of Git for a smoother command-line experience.
+Git++ is an interactive Git extension that adds guided workflows and streamlined commands to simplify daily Git operations.
 
-Git++ provides an interactive layer on top of Git.
-It introduces additional subcommands and guided prompts that streamline routine operations and make command outcomes easier to understand.
+It provides an optional interactive layer on top of Git’s core CLI — enhancing usability without changing Git’s underlying behavior.
 
-## Features
-
-- **Interactive prompts** - Select branches, files, and options with visual selectors
-- **Clear feedback** - Color-coded output and grouped change displays
-- **Git aliases** - Use `gpp` commands directly with `git` (e.g. `git goto` --> `gpp goto`)
-- **Safety checks** - Confirmation prompts for destructive operations
+---
 
 ## Installation
 
@@ -18,100 +12,123 @@ It introduces additional subcommands and guided prompts that streamline routine 
 npm install -g git-plus-plus
 ```
 
-After installation, Git++ automatically configures git aliases so you can use commands like `git goto` and `git pick` directly.
+After installation, Git++ configures Git aliases so you can run commands such as `git goto` and `git pick` directly.
 
-> **Note:** All Git++ commands can be run with either `gpp <command>` or `git <command>`. This documentation uses the git prefix for most commands to show how Git++ integrates directly with Git.
+> Note: Administrative commands like `gpp doctor` and `gpp rebuild` must be invoked using `gpp`. All other subcommands can be run as either `gpp <command>` or `git <command>`.
+
+---
 
 ## Quick Start
 
 ```bash
-# Check installation
+# Verify installation and alias setup
 gpp doctor
 
 # Switch branches interactively
 git goto
 
-# Stage changes selectively
+# Stage specific changes
 git pick
 
-# Commit and push everything
+# Commit and push all changes
 git publish "feat: add new feature"
 ```
 
-## Why Git++?
+---
 
-Git is powerful but its CLI can be cumbersome. Git++ provides:
+## Overview
 
-- **Interactive selection** instead of typing branch/file names
-- **Visual confirmation** of what will change before executing
-- **Streamlined workflows** for common operations
-- **Consistent patterns** across all commands
-- **Better error messages** with helpful suggestions
+Git’s command-line interface is powerful but often verbose and unintuitive.  
+Git++ addresses this by providing an interactive and efficient developer experience with:
+
+- **Interactive selectors** for branches and files
+- **Colorized and grouped output** for better visibility
+- **Git aliases** that integrate seamlessly into existing workflows
+- **Built-in safety checks** for destructive operations
+- **Consistent, minimal syntax** for frequent Git commands
 
 ---
 
-## Commands
+## Command Reference
 
-### Administrative
+### Administrative Commands
 
-**`gpp doctor`** - Check Git++ installation and configuration health. Verifies git is installed, gpp is in PATH, and git aliases are configured correctly.
+#### `gpp doctor`
 
-**`gpp rebuild`** - Install or update Git++ aliases in `~/.gitconfig`. Automatically runs after global install.
+Checks Git++ installation status, PATH configuration, and alias setup.
+
+#### `gpp rebuild`
+
+(Re)installs Git++ aliases in `~/.gitconfig`.  
+Used when aliases are missing or misconfigured.
+
+---
 
 ### Branch Operations
 
-**`git goto [branch]`** - Switch branches. Interactive selector if no branch specified.
+#### `git goto [branch]`
 
-**`git create [branch]`** - Create and switch to a new branch. Prompts for name if not provided.
+Switch to the specified branch.  
+If no branch is provided, opens an interactive selector.
 
-**`git delete [branches...]`** - Delete one or more branches. Interactive multi-select if no branches specified. Shows confirmation before deletion.
+#### `git create [branch]`
 
-**`git rename`** - Rename a branch interactively.
+Create and switch to a new branch. Prompts for a name if omitted.
 
-**`git track [branch]`** - Set upstream tracking branch for current branch. Defaults to current branch name if not specified.
+#### `git delete [branches...]`
+
+Delete one or more branches. Interactive multi-select if none specified.  
+Displays a summary and requires confirmation.
+
+#### `git rename`
+
+Rename a selected branch interactively.
+
+#### `git track [branch]`
+
+Set the upstream branch for the current branch.  
+Defaults to tracking the same branch name on origin.
+
+---
 
 ### Change Management
 
-**`git pick [files...]`** - Stage unstaged changes. Interactive multi-select with color-coded status indicators if no files specified.
+#### `git pick [files...]`
 
-**`git drop [files...]`** - Unstage staged changes. Interactive multi-select if no files specified.
+Stage unstaged changes.  
+If no files are specified, opens an interactive multi-select menu with color-coded file states.
 
-**`git publish [message]`** - Stage all changes, commit, and push to remote. Prompts for message if not provided. Shows confirmation before committing.
+#### `git drop [files...]`
 
-**`git uncommit`** - Undo last commit, keeping changes staged. Useful for fixing commit messages or adding forgotten changes.
+Unstage staged changes.  
+If no files are specified, opens an interactive multi-select menu with color-coded file states.
 
-**`git wipe`** - Discard all uncommitted changes and untracked files (destructive). Requires typing "confirm" to proceed.
+#### `git publish [message]`
+
+Stage all changes, commit, and push to the remote branch.  
+Prompts for a commit message if not provided, and shows a pre-commit summary for confirmation.
+
+#### `git uncommit`
+
+Undo the most recent commit while preserving changes in the staging area.  
+Useful for adjusting commit messages or adding missing files.
+
+#### `git wipe`
+
+Discard all uncommitted changes and remove untracked files.  
+This command is **destructive** and requires typing `confirm` to proceed.
 
 ---
 
 ## Configuration
 
-Git++ stores no configuration files. All settings are:
+Git++ does not create or manage external configuration files.  
+All settings are stored in standard Git locations, specifically:
 
-- Git aliases in `~/.gitconfig` (managed by `gpp rebuild`)
-- Uses standard git configuration
+- Aliases in `~/.gitconfig` (managed by `gpp rebuild`)
+- Existing Git configuration remains untouched
 
-## Troubleshooting
-
-### Commands not found after install
-
-Run `gpp doctor` to check if gpp is in PATH. If not:
-
-```bash
-# Reinstall with
-npm install -g git-plus-plus
-
-# Or check npm's global bin directory is in PATH
-npm prefix -g
-```
-
-### Git aliases not working
-
-Run `gpp rebuild` to reinstall git aliases:
-
-```bash
-gpp rebuild
-```
+---
 
 ## Development
 
@@ -123,17 +140,13 @@ cd git-plus-plus
 # Install dependencies
 pnpm install
 
-# Run in development mode
+# Run a specific command in development mode
 pnpm dev goto
 
-# Build
+# Build for distribution
 pnpm build
 
-# Test locally
-npm pack
-npm install -g ./git-plus-plus-1.0.0.tgz
+# Test local installation
+pnpm pack
+pnpm install -g ./git-plus-plus-1.0.0.tgz
 ```
-
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details.
