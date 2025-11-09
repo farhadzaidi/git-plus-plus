@@ -41,7 +41,7 @@ export async function execute(branches: string[]): Promise<void> {
     })
   );
 
-  if (branchesToDelete?.length) {
+  if (branchesToDelete.length) {
     console.log(chalk.yellow.bold('\nDeleting the following branches:'));
     for (const branch of branchesToDelete) {
       console.log(chalk.dim(`  • ${branch}`));

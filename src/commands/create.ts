@@ -23,9 +23,7 @@ export async function execute(branch?: string): Promise<void> {
     })
   );
 
-  if (newBranch) {
-    await createBranch(newBranch);
-  }
+  await createBranch(newBranch);
 }
 
 async function createBranch(branch: string): Promise<void> {

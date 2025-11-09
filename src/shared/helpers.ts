@@ -3,7 +3,7 @@ import { confirm } from '@inquirer/prompts';
 import { execa } from 'execa';
 import { EXIT } from '@/shared/constants';
 
-export async function safePrompt<T>(promptFn: () => Promise<T>): Promise<T | null> {
+export async function safePrompt<T>(promptFn: () => Promise<T>): Promise<T> {
   try {
     return await promptFn();
   } catch (error: any) {

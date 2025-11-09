@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 
 import { GPP, COMMANDS } from '@/shared/constants';
-import { rebuild, goto, create, publish, delete as deleteBranches } from '@/commands';
+import { rebuild, goto, create, publish, delete as deleteBranches, rename } from '@/commands';
 
 const program = new Command();
 
@@ -50,6 +50,13 @@ program
   )
   .action((branches: string[]) => {
     deleteBranches(branches);
+  });
+
+program
+  .command(COMMANDS.RENAME)
+  .description('Opens up interactive selector to pick a branch to rename.')
+  .action(() => {
+    rename();
   });
 
 program.parse();

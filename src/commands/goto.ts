@@ -33,8 +33,6 @@ export async function execute(branch?: string): Promise<void> {
   );
 
   // Switch to the selected branch
-  if (selectedBranch) {
-    const result = await execa('git', ['switch', selectedBranch], { reject: false });
-    processCommand(result);
-  }
+  const result = await execa('git', ['switch', selectedBranch], { reject: false });
+  processCommand(result);
 }

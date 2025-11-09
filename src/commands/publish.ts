@@ -83,7 +83,7 @@ export async function execute(message?: string): Promise<void> {
 
   // Prompt user for the commit message if they didn't provide one
   nl();
-  let commitMessage = message || null;
+  let commitMessage = message;
   if (!commitMessage) {
     commitMessage = await safePrompt(() =>
       input({
@@ -100,7 +100,7 @@ export async function execute(message?: string): Promise<void> {
 
   // Publish
   nl();
-  await publish(commitMessage as string);
+  await publish(commitMessage);
   console.log(chalk.green('Changes published successfully.'));
 }
 

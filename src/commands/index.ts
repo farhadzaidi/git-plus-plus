@@ -3,3 +3,4 @@ export { execute as goto } from '@/commands/goto';
 export { execute as create } from '@/commands/create';
 export { execute as publish } from '@/commands/publish';
 export { execute as delete } from '@/commands/delete';
+export { execute as rename } from '@/commands/rename';
