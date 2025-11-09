@@ -5,54 +5,56 @@ import chalk from 'chalk';
 import { safePrompt, processCommand } from '@/shared/helpers';
 
 export async function execute(branch?: string): Promise<void> {
-	// If the branch is provided, switch to it (delegate to git)
-	if (branch) {
-		const result = await execa('git', ['switch', branch], { reject: false });
-		processCommand(result);
-		return;
-	}
+  // If the branch is provided, switch to it (delegate to git)
+  if (branch) {
+    const result = await execa('git', ['switch', branch], { reject: false });
+    processCommand(result);
+    return;
+  }
 
-	// If the branch isn't provided, get all branches and prompt user to select one
-	const allBranches = await getAllBranches();
-	const selectedBranch = await safePrompt(() => select({
-		message: chalk.cyan('Select a branch (Ctrl + C to cancel): '),
-		choices: allBranches.map((b) => ({
-			name: b.isCurrent
-				? `${chalk.green('●')} ${b.name} ${chalk.dim.italic('(current)')}`
-				: `  ${b.name}`,
-			value: b.name,
-		})),
-		default: allBranches.find((b) => b.isCurrent)?.name,
-		theme: {
-			style: {
-				highlight: (text: string) => chalk.magenta.bold(text),
-				answer: (text: string) => chalk.green(text),
-			},
-		},
-	}));
+  // If the branch isn't provided, get all branches and prompt user to select one
+  const allBranches = await getAllBranches();
+  const selectedBranch = await safePrompt(() =>
+    select({
+      message: chalk.cyan('Select a branch (Ctrl + C to cancel): '),
+      choices: allBranches.map((b) => ({
+        name: b.isCurrent
+          ? `${chalk.green('●')} ${b.name} ${chalk.dim.italic('(current)')}`
+          : `  ${b.name}`,
+        value: b.name,
+      })),
+      default: allBranches.find((b) => b.isCurrent)?.name,
+      theme: {
+        style: {
+          highlight: (text: string) => chalk.magenta.bold(text),
+          answer: (text: string) => chalk.green(text),
+        },
+      },
+    })
+  );
 
-	// Switch to the selected branch
-	if (selectedBranch) {
-		const result = await execa('git', ['switch', selectedBranch], { reject: false });
-		processCommand(result);
-	}
+  // Switch to the selected branch
+  if (selectedBranch) {
+    const result = await execa('git', ['switch', selectedBranch], { reject: false });
+    processCommand(result);
+  }
 }
 
 async function getAllBranches() {
-	try {
-		// List all branches via stdout
-		const { stdout } = await execa('git', ['--no-pager', 'branch']);
+  try {
+    // List all branches via stdout
+    const { stdout } = await execa('git', ['--no-pager', 'branch']);
 
-		// Parse and return output
-		return stdout.split('\n').map((line) => {
-			line = line.trim();
-			return {
-				name: line.replace(/^\*\s*/, ''),
-				isCurrent: line.startsWith('*'),
-			};
-		});
-	} catch (error) {
-		console.log(chalk.red('Error: Failed to retrieve branches.'));
-		process.exit(EXIT.FAILURE);
-	}
+    // Parse and return output
+    return stdout.split('\n').map((line) => {
+      line = line.trim();
+      return {
+        name: line.replace(/^\*\s*/, ''),
+        isCurrent: line.startsWith('*'),
+      };
+    });
+  } catch (error) {
+    console.log(chalk.red('Error: Failed to retrieve branches.'));
+    process.exit(EXIT.FAILURE);
+  }
 }

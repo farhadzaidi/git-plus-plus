@@ -10,38 +10,36 @@ const program = new Command();
 program.name(GPP).description('Git++ - TBD');
 
 program
-	.command(COMMANDS.REBUILD)
-	.description('Add Git++ command aliases to .gitconfig')
-	.action(rebuild);
+  .command(COMMANDS.REBUILD)
+  .description('Add Git++ command aliases to .gitconfig')
+  .action(rebuild);
 
 program
-	.command(COMMANDS.GOTO)
-	.argument('[branch]', 'Branch to switch to')
-	.description(
-		'Switches to the provided branch if provided. Otherwise, opens up the interactive branch selector.'
-	)
-	.action((branch?: string) => {
-		goto(branch);
-	});
+  .command(COMMANDS.GOTO)
+  .argument('[branch]', 'Branch to switch to')
+  .description(
+    'Switches to the provided branch if provided. Otherwise, opens up the interactive branch selector.'
+  )
+  .action((branch?: string) => {
+    goto(branch);
+  });
 
 program
-	.command(COMMANDS.CREATE)
-	.argument('[branch]', 'Name of newly created branch')
-	.description(
-		'Creates a new branch from the current one using the specified name.'
-	)
-	.action((branch?: string) => {
-		create(branch);
-	});
+  .command(COMMANDS.CREATE)
+  .argument('[branch]', 'Name of newly created branch')
+  .description('Creates a new branch from the current one using the specified name.')
+  .action((branch?: string) => {
+    create(branch);
+  });
 
 program
-	.command(COMMANDS.PUBLISH)
-	.argument('[message]', 'Commit message')
-	.description(
-		'Stages all changes in the current directory, commits them to the current branch, and pushes to the remote branch.'
-	)
-	.action((message?: string) => {
-		publish(message);
-	});
+  .command(COMMANDS.PUBLISH)
+  .argument('[message]', 'Commit message')
+  .description(
+    'Stages all changes in the current directory, commits them to the current branch, and pushes to the remote branch.'
+  )
+  .action((message?: string) => {
+    publish(message);
+  });
 
 program.parse();

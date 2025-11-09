@@ -1,5 +1,5 @@
 import { execa } from 'execa';
-import { input } from '@inquirer/prompts'
+import { input } from '@inquirer/prompts';
 import chalk, { ChalkInstance } from 'chalk';
 import { EXIT } from '@/shared/constants';
 import { genericConfirmPrompt, safePrompt, processCommand, nl } from '@/shared/helpers';
@@ -9,27 +9,26 @@ enum FileStatus {
   MODIFIED = 'modified',
   DELETED = 'deleted',
   RENAMED = 'renamed',
-};
+}
 
 type ParseGitStatusResult = {
-  fileName: string,
-  fileStatus: FileStatus
+  fileName: string;
+  fileStatus: FileStatus;
 }[];
 
 const STATUS_MAPPING: Record<string, FileStatus> = {
   '?': FileStatus.CREATED,
-  'A': FileStatus.CREATED,
-  'M': FileStatus.MODIFIED,
-  'D': FileStatus.DELETED,
-  'R': FileStatus.RENAMED,
+  A: FileStatus.CREATED,
+  M: FileStatus.MODIFIED,
+  D: FileStatus.DELETED,
+  R: FileStatus.RENAMED,
 };
-
 
 const STATUS_COLORS: Record<FileStatus, ChalkInstance> = {
   [FileStatus.CREATED]: chalk.green,
   [FileStatus.MODIFIED]: chalk.yellow,
   [FileStatus.DELETED]: chalk.red,
-  [FileStatus.RENAMED]: chalk.cyan
+  [FileStatus.RENAMED]: chalk.cyan,
 };
 
 const STATUS_ORDER: FileStatus[] = [
@@ -49,7 +48,7 @@ export async function execute(message?: string): Promise<void> {
   // Get current status and return early if there are no changes
   const currentStatus = statusResult.stdout;
   if (currentStatus === '') {
-    console.log(chalk.cyan('No changes to publish in this branch.'))
+    console.log(chalk.cyan('No changes to publish in this branch.'));
     return;
   }
 
@@ -86,15 +85,17 @@ export async function execute(message?: string): Promise<void> {
   nl();
   let commitMessage = message || null;
   if (!commitMessage) {
-    commitMessage = await safePrompt(() => input({
-      message: chalk.cyan('Enter a commit message (Ctrl + C to cancel)\n'),
-      required: true,
-      theme: {
-        style: {
-          answer: (text: string) => chalk.magenta(text),
-        }
-      }
-    }));
+    commitMessage = await safePrompt(() =>
+      input({
+        message: chalk.cyan('Enter a commit message (Ctrl + C to cancel)\n'),
+        required: true,
+        theme: {
+          style: {
+            answer: (text: string) => chalk.magenta(text),
+          },
+        },
+      })
+    );
   }
 
   // Publish
@@ -118,7 +119,7 @@ function parseGitStatus(status: string): ParseGitStatusResult {
   const result: ParseGitStatusResult = [];
   const lines = status.split('\n').filter(Boolean);
   for (const line of lines) {
-    const statusCode = line[0]
+    const statusCode = line[0];
     const fileName = line.slice(1).trim();
 
     if (!isValidStatusCode(statusCode)) {
@@ -132,14 +133,12 @@ function parseGitStatus(status: string): ParseGitStatusResult {
     }
 
     const fileStatus = STATUS_MAPPING[statusCode];
-    result.push({ fileName, fileStatus })
+    result.push({ fileName, fileStatus });
   }
 
   return result;
 }
 
-function isValidStatusCode(
-  key: string
-): key is keyof typeof STATUS_MAPPING {
+function isValidStatusCode(key: string): key is keyof typeof STATUS_MAPPING {
   return key in STATUS_MAPPING;
 }

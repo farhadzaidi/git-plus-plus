@@ -11,15 +11,17 @@ export async function execute(branch?: string): Promise<void> {
   }
 
   // If the branch is not provided, prompt the user to enter a brach name
-  const newBranch = await safePrompt(() => input({
-    message: chalk.cyan('Enter a name for the new branch (Ctrl + C to cancel)\n'),
-    required: true,
-    theme: {
-      style: {
-        answer: (text: string) => chalk.magenta(text),
-      }
-    }
-  }));
+  const newBranch = await safePrompt(() =>
+    input({
+      message: chalk.cyan('Enter a name for the new branch (Ctrl + C to cancel)\n'),
+      required: true,
+      theme: {
+        style: {
+          answer: (text: string) => chalk.magenta(text),
+        },
+      },
+    })
+  );
 
   if (newBranch) {
     await createBranch(newBranch);
