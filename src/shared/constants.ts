@@ -11,7 +11,7 @@ export const COMMANDS = {
   PUBLISH: 'publish',
   DELETE: 'delete',
   RENAME: 'rename',
-  TRACK: 'track', // auto set upstream (git push -u origin HEAD)
+  TRACK: 'track',
   UNCOMMIT: 'uncommit', // safe uncommit (git reset --soft HEAD~1)
   PICK: 'pick', // choose from unstage (including untracked) files to stage - multiselect and confirm
   DROP: 'drop', // choose from staged files to unstage - multiselect and confirm

@@ -21,7 +21,7 @@ export async function execute(): Promise<void> {
   const newConfig: IniConfig = generateNewConfig(existingConfig);
   fs.writeFileSync(gitConfigPath, ini.stringify(newConfig));
 
-  console.log(chalk.green('Successfully installed Git++ aliases.'));
+  console.log(chalk.green('Successfully installed Git++ aliases'));
 }
 
 function generateNewConfig(existingConfig: IniConfig): IniConfig {

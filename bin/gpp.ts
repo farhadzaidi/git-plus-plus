@@ -11,6 +11,7 @@ import {
   delete as deleteBranches,
   rename,
   track,
+  uncommit,
 } from '@/commands';
 
 const program = new Command();
@@ -67,6 +68,13 @@ program
   .description('Sets the upstream tracking branch for the current local branch.')
   .action((branch?: string) => {
     track(branch);
+  });
+
+program
+  .command(COMMANDS.UNCOMMIT)
+  .description('Undoes the last commit, keeping changes staged.')
+  .action(() => {
+    uncommit();
   });
 
 program.parse();

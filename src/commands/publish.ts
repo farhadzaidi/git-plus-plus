@@ -101,7 +101,7 @@ export async function execute(message?: string): Promise<void> {
   // Publish
   nl();
   await publish(commitMessage);
-  console.log(chalk.green('Changes published successfully.'));
+  console.log(chalk.green('Successfully published changes'));
 }
 
 async function publish(commitMessage: string) {

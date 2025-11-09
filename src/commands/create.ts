@@ -29,4 +29,8 @@ export async function execute(branch?: string): Promise<void> {
 async function createBranch(branch: string): Promise<void> {
   const result = await execa('git', ['checkout', '-b', branch], { reject: false });
   processCommand(result);
+
+  console.log(
+    chalk.green(`Successfully created and switched to branch ${chalk.magenta.bold(branch)}`)
+  );
 }

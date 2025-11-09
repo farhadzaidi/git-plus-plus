@@ -1,7 +1,8 @@
-import { getAllBranches, processCommand } from '@/shared/helpers';
+import chalk from 'chalk';
 import { execa } from 'execa';
+import { getAllBranches, processCommand } from '@/shared/helpers';
 
-export async function execute(branch?: string) {
+export async function execute(branch?: string): Promise<void> {
   // Get the current branch
   const allBranches = await getAllBranches();
   const currentBranch = allBranches.find((b) => b.isCurrent)!.name;
@@ -10,18 +11,20 @@ export async function execute(branch?: string) {
   const remoteBranch = branch ? branch : currentBranch;
 
   processCommand(
-    await execa('git', ['config', 'branch', `${currentBranch}.remote`, 'origin'], {
+    await execa('git', ['config', `branch.${currentBranch}.remote`, 'origin'], {
       reject: false,
     })
   );
 
   processCommand(
-    await execa(
-      'git',
-      ['config', 'branch', `${currentBranch}.merge`, `refs/heads/${remoteBranch}`],
-      {
-        reject: false,
-      }
+    await execa('git', ['config', `branch.${currentBranch}.merge`, `refs/heads/${remoteBranch}`], {
+      reject: false,
+    })
+  );
+
+  console.log(
+    chalk.green(
+      `Local branch ${chalk.cyan.bold(currentBranch)} is now tracking remote branch ${chalk.magenta.bold(remoteBranch)}.`
     )
   );
 }

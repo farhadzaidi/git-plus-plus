@@ -12,8 +12,7 @@ import {
 export async function execute(branches: string[]): Promise<void> {
   // If the branches to delete are provided, delete them
   if (branches.length) {
-    const result = await execa('git', ['branch', '-D', ...branches], { reject: false });
-    processCommand(result);
+    deleteBranches(branches);
     return;
   }
 
@@ -41,20 +40,18 @@ export async function execute(branches: string[]): Promise<void> {
     })
   );
 
-  if (branchesToDelete.length) {
-    console.log(chalk.yellow.bold('\nDeleting the following branches:'));
-    for (const branch of branchesToDelete) {
-      console.log(chalk.dim(`  • ${branch}`));
-    }
+  // Delete selected branches, if any
+  branchesToDelete.length ? deleteBranches(branchesToDelete) : console.log('No branch selected');
+}
 
-    nl();
-    const confirm = await genericConfirmPrompt();
-    if (!confirm) return;
-    nl();
-
-    const result = await execa('git', ['branch', '-D', ...branchesToDelete], { reject: false });
-    processCommand(result);
-  } else {
-    console.log('No branch selected.');
+async function deleteBranches(branches: string[]) {
+  console.log(chalk.yellow.bold('\nDeleting the following branches:'));
+  for (const branch of branches) {
+    console.log(chalk.dim(`  • ${branch}`));
   }
+
+  nl();
+  const confirm = await genericConfirmPrompt();
+  if (!confirm) return;
+  nl();
 }

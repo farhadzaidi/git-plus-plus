@@ -46,7 +46,7 @@ export async function execute(): Promise<void> {
 
   console.log(
     chalk.green(
-      `\n\t${chalk.green(selectedBranch)} ${chalk.cyan('-->')} ${chalk.magenta(newName)}\n`
+      `\n\t${chalk.cyan.bold(selectedBranch)} ${chalk.green('-->')} ${chalk.magenta.bold(newName)}\n`
     )
   );
   const confirm = await genericConfirmPrompt();
@@ -54,4 +54,6 @@ export async function execute(): Promise<void> {
 
   const result = await execa('git', ['branch', '-m', selectedBranch, newName], { reject: false });
   processCommand(result);
+
+  console.log(`\nRenamed ${chalk.cyan.bold(selectedBranch)} to ${chalk.magenta.bold(newName)}`);
 }
