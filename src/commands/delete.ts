@@ -46,7 +46,7 @@ export async function execute(branches: string[]): Promise<void> {
   branchesToDelete.length ? await deleteBranches(branchesToDelete) : console.log('No branch selected');
 }
 
-async function deleteBranches(branches: string[]) {
+async function deleteBranches(branches: string[]): Promise<void> {
   console.log(chalk.yellow.bold('\nDeleting the following branches:'));
   for (const branch of branches) {
     console.log(chalk.dim(`  • ${branch}`));

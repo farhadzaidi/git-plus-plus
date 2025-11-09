@@ -10,6 +10,7 @@ import {
   nl,
   parseGitChanges,
   displayGroupedChanges,
+  getGitStatus,
 } from '@/shared/helpers';
 
 export async function execute(message?: string): Promise<void> {
@@ -19,12 +20,8 @@ export async function execute(message?: string): Promise<void> {
   const addResult = await execa('git', ['add', '.'], { reject: false });
   processCommand(addResult, false);
 
-  // Get current git status
-  const statusResult = await execa('git', ['status', '--porcelain'], { reject: false });
-  processCommand(statusResult, false);
-
-  // Return early if there are no changes
-  const currentStatus = statusResult.stdout;
+  // Get current status and validate that there are changes
+  const currentStatus = await getGitStatus();
   if (currentStatus === '') {
     console.log(chalk.cyan('No changes to publish in this branch.'));
     return;
@@ -60,7 +57,7 @@ export async function execute(message?: string): Promise<void> {
   console.log(chalk.green('Successfully published changes'));
 }
 
-async function publish(commitMessage: string) {
+async function publish(commitMessage: string): Promise<void> {
   const addResult = await execa('git', ['add', '.'], { reject: false });
   processCommand(addResult, false);
 

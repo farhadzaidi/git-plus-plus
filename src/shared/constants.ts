@@ -26,11 +26,7 @@ export const COMMANDS = {
   UNCOMMIT: 'uncommit',
   PICK: 'pick',
   DROP: 'drop',
-
-  // wipe - show a dry run and ask to confirm
-  // --unstaged - interactively choose or specify (clean -fd)
-  // --staged - interactively choose or specify (restore)
-  // --all - git reset --hard
+  WIPE: 'wipe',
 };
 
 export const GITCONFIG_ALIASES = {

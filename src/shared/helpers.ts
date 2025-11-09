@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { confirm } from '@inquirer/prompts';
+import { confirm, select } from '@inquirer/prompts';
 import { execa } from 'execa';
 import {
   EXIT,
@@ -11,6 +11,11 @@ import {
   ParsedChanges,
   ChangePosition,
 } from '@/shared/constants';
+
+type Branch = {
+  name: string;
+  isCurrent: boolean;
+};
 
 // =============================================================================
 // PROMPT UTILITIES
@@ -56,9 +61,66 @@ export async function confirmOrExit(): Promise<void> {
   }
 }
 
+/**
+ * Prompts user to select a branch from a list
+ * @param branches - Array of branch objects
+ * @returns Selected branch name
+ */
+export async function promptForBranch(branches: Branch[]): Promise<string> {
+  return safePrompt(() =>
+    select({
+      message: chalk.cyan('Select a branch (Ctrl + C to cancel)'),
+      choices: branches.map((b) => ({
+        name: b.isCurrent
+          ? `${chalk.green('●')} ${b.name} ${chalk.dim.italic('(current)')}`
+          : `  ${b.name}`,
+        value: b.name,
+      })),
+      default: branches.find((b) => b.isCurrent)?.name,
+      theme: {
+        style: {
+          highlight: (text: string) => chalk.magenta.bold(text),
+          answer: (text: string) => chalk.green(text),
+        },
+      },
+    })
+  );
+}
+
 // =============================================================================
 // GIT OPERATIONS
 // =============================================================================
+
+/**
+ * Retrieves all git branches in the current repository
+ * @returns Array of branch objects with name and current status
+ */
+export async function getAllBranches(): Promise<Branch[]> {
+  try {
+    const { stdout } = await execa('git', ['--no-pager', 'branch']);
+
+    return stdout.split('\n').map((line) => {
+      line = line.trim();
+      return {
+        name: line.replace(/^\*\s*/, ''),
+        isCurrent: line.startsWith('*'),
+      };
+    });
+  } catch (error) {
+    console.log(chalk.red('Error: Failed to retrieve branches.'));
+    process.exit(EXIT.FAILURE);
+  }
+}
+
+/**
+ * Gets the current git status using porcelain format
+ * @returns Git status output string
+ */
+export async function getGitStatus(): Promise<string> {
+  const statusResult = await execa('git', ['status', '--porcelain'], { reject: false });
+  processCommand(statusResult, false);
+  return statusResult.stdout;
+}
 
 /**
  * Ensures at least one commit exists in the repository
@@ -77,7 +139,7 @@ export async function ensureCommitsExist(): Promise<void> {
  * Logs warning and exits if no branches found
  * @param branches - Array of branches
  */
-export function ensureBranchesExist(branches: Awaited<ReturnType<typeof getAllBranches>>): void {
+export function ensureBranchesExist(branches: Branch[]): void {
   if (branches.length === 0) {
     console.log(chalk.yellow('No branches found. Create an initial commit first.'));
     process.exit(EXIT.SUCCESS);
@@ -95,27 +157,6 @@ export async function ensureRemoteExists(): Promise<void> {
       chalk.yellow('No remote configured. Add a remote first with: git remote add origin <url>')
     );
     process.exit(EXIT.SUCCESS);
-  }
-}
-
-/**
- * Retrieves all git branches in the current repository
- * @returns Array of branch objects with name and current status
- */
-export async function getAllBranches() {
-  try {
-    const { stdout } = await execa('git', ['--no-pager', 'branch']);
-
-    return stdout.split('\n').map((line) => {
-      line = line.trim();
-      return {
-        name: line.replace(/^\*\s*/, ''),
-        isCurrent: line.startsWith('*'),
-      };
-    });
-  } catch (error) {
-    console.log(chalk.red('Error: Failed to retrieve branches.'));
-    process.exit(EXIT.FAILURE);
   }
 }
 

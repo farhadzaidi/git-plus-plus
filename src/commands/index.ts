@@ -8,3 +8,4 @@ export { execute as track } from '@/commands/track';
 export { execute as uncommit } from '@/commands/uncommit';
 export { execute as pick } from '@/commands/pick';
 export { execute as drop } from '@/commands/drop';
+export { execute as wipe } from '@/commands/wipe';

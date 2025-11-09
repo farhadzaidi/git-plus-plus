@@ -8,15 +8,12 @@ import {
   processCommand,
   parseGitChanges,
   displayGroupedChanges,
+  getGitStatus,
 } from '@/shared/helpers';
 
 export async function execute(files?: string[]): Promise<void> {
-  // Get current git status
-  const statusResult = await execa('git', ['status', '--porcelain'], { reject: false });
-  processCommand(statusResult, false);
-
-  // Return early if no changes to unstage
-  const currentStatus = statusResult.stdout;
+  // Get current status and validate that there are changes
+  const currentStatus = await getGitStatus();
   if (currentStatus === '') {
     console.log(chalk.cyan('No staged changes to unstage.'));
     return;

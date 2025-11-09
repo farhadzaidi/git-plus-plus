@@ -14,6 +14,7 @@ import {
   uncommit,
   pick,
   drop,
+  wipe,
 } from '@/commands';
 
 const program = new Command();
@@ -93,6 +94,13 @@ program
   .description('Interactively select staged changes to unstage.')
   .action((files: string[]) => {
     drop(files);
+  });
+
+program
+  .command(COMMANDS.WIPE)
+  .description('Discards all uncommitted changes (git reset --hard).')
+  .action(() => {
+    wipe();
   });
 
 program.parse();

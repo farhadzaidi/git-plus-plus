@@ -1,5 +1,5 @@
 import { execa } from 'execa';
-import { select, input } from '@inquirer/prompts';
+import { input } from '@inquirer/prompts';
 import chalk from 'chalk';
 import {
   safePrompt,
@@ -8,30 +8,14 @@ import {
   ensureBranchesExist,
   processCommand,
   nl,
+  promptForBranch,
 } from '@/shared/helpers';
 
 export async function execute(): Promise<void> {
   const allBranches = await getAllBranches();
   ensureBranchesExist(allBranches);
 
-  const selectedBranch = await safePrompt(() =>
-    select({
-      message: chalk.cyan('Select a branch (Ctrl + C to cancel)'),
-      choices: allBranches.map((b) => ({
-        name: b.isCurrent
-          ? `${chalk.green('●')} ${b.name} ${chalk.dim.italic('(current)')}`
-          : `  ${b.name}`,
-        value: b.name,
-      })),
-      default: allBranches.find((b) => b.isCurrent)?.name,
-      theme: {
-        style: {
-          highlight: (text: string) => chalk.magenta.bold(text),
-          answer: (text: string) => chalk.green(text),
-        },
-      },
-    })
-  );
+  const selectedBranch = await promptForBranch(allBranches);
 
   // Switch to the selected branch
   nl();
