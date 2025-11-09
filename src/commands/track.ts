@@ -1,10 +1,13 @@
 import chalk from 'chalk';
 import { execa } from 'execa';
-import { getAllBranches, processCommand } from '@/shared/helpers';
+import { getAllBranches, ensureBranchesExist, ensureRemoteExists, processCommand } from '@/shared/helpers';
 
 export async function execute(branch?: string): Promise<void> {
   // Get the current branch
   const allBranches = await getAllBranches();
+  ensureBranchesExist(allBranches);
+  await ensureRemoteExists();
+
   const currentBranch = allBranches.find((b) => b.isCurrent)!.name;
 
   // Default the remote branch to the current branch if it wasn't provided

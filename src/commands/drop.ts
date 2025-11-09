@@ -15,27 +15,29 @@ export async function execute(files?: string[]): Promise<void> {
   const statusResult = await execa('git', ['status', '--porcelain'], { reject: false });
   processCommand(statusResult, false);
 
+  // Return early if no changes to unstage
   const currentStatus = statusResult.stdout;
   if (currentStatus === '') {
-    console.log(chalk.cyan('No unstaged changes to pick.'));
+    console.log(chalk.cyan('No staged changes to unstage.'));
     return;
   }
 
-  // Parse unstaged changes (including untracked files)
-  const parsedChanges = parseGitChanges(currentStatus, CHANGE_POSITION.UNSTAGED);
+  // Parse staged changes
+  const parsedChanges = parseGitChanges(currentStatus, CHANGE_POSITION.STAGED);
   if (parsedChanges.length === 0) {
-    console.log(chalk.cyan('No unstaged changes to pick.'));
+    console.log(chalk.cyan('No staged changes to unstage.'));
     return;
   }
 
   let selectedFiles: string[];
 
-  // If files are provided via args, validate they're all unstaged
+  // If files are provided via args, validate they're all staged
   if (files && files.length > 0) {
     validateProvidedFileArgs(files, parsedChanges);
     selectedFiles = files;
   } else {
-    selectedFiles = await promptForChangesToStage(parsedChanges);
+    // Otherwise open up interactive promp
+    selectedFiles = await promptForChangesToUnstage(parsedChanges);
     if (selectedFiles.length === 0) {
       console.log('No changes selected');
       return;
@@ -46,26 +48,26 @@ export async function execute(files?: string[]): Promise<void> {
   const selectedChanges = parsedChanges.filter((item) => selectedFiles.includes(item.fileName));
   displayGroupedChanges(selectedChanges);
 
-  // Confirm staging
+  // Confirm unstaging
   await confirmOrExit();
 
-  // Stage the selected files
+  // Unstage the selected files
   for (const file of selectedFiles) {
-    const addResult = await execa('git', ['add', file], { reject: false });
-    processCommand(addResult, false);
+    const restoreResult = await execa('git', ['restore', '--staged', file], { reject: false });
+    processCommand(restoreResult, false);
   }
 
   console.log(
     chalk.green(
-      `\nSuccessfully staged ${selectedFiles.length} change${selectedFiles.length === 1 ? '' : 's'}`
+      `\nSuccessfully unstaged ${selectedFiles.length} change${selectedFiles.length === 1 ? '' : 's'}`
     )
   );
 }
 
-async function promptForChangesToStage(changes: ParsedChanges): Promise<string[]> {
+async function promptForChangesToUnstage(changes: ParsedChanges): Promise<string[]> {
   return await safePrompt(() =>
     checkbox({
-      message: chalk.cyan('Select changes to stage (Ctrl + C to cancel)'),
+      message: chalk.cyan('Select changes to unstage (Ctrl + C to cancel)'),
       choices: changes
         .sort((a, b) => a.fileName.localeCompare(b.fileName))
         .map((item) => {
@@ -78,7 +80,7 @@ async function promptForChangesToStage(changes: ParsedChanges): Promise<string[]
       loop: false,
       theme: {
         icon: {
-          checked: chalk.green('◉'),
+          checked: chalk.yellow('◉'),
           unchecked: '◯',
         },
         style: {
@@ -90,11 +92,11 @@ async function promptForChangesToStage(changes: ParsedChanges): Promise<string[]
 }
 
 function validateProvidedFileArgs(files: string[], changes: ParsedChanges): void {
-  const unstagedFileNames = changes.map((c) => c.fileName);
-  const invalidFiles = files.filter((f) => !unstagedFileNames.includes(f));
+  const stagedFileNames = changes.map((c) => c.fileName);
+  const invalidFiles = files.filter((f) => !stagedFileNames.includes(f));
 
   if (invalidFiles.length > 0) {
-    console.log(chalk.yellow('\nThe following files are not in unstaged changes:'));
+    console.log(chalk.yellow('\nThe following files are not in staged changes:'));
     for (const file of invalidFiles) {
       console.log(chalk.yellow(`  ${file}`));
     }

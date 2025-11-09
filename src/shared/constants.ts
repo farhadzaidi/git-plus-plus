@@ -24,8 +24,8 @@ export const COMMANDS = {
   RENAME: 'rename',
   TRACK: 'track',
   UNCOMMIT: 'uncommit',
-  PICK: 'pick', // choose from unstage (including untracked) files to stage - multiselect and confirm
-  DROP: 'drop', // choose from staged files to unstage - multiselect and confirm
+  PICK: 'pick',
+  DROP: 'drop',
 
   // wipe - show a dry run and ask to confirm
   // --unstaged - interactively choose or specify (clean -fd)

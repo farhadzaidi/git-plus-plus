@@ -13,6 +13,7 @@ import {
   track,
   uncommit,
   pick,
+  drop,
 } from '@/commands';
 
 const program = new Command();
@@ -80,9 +81,18 @@ program
 
 program
   .command(COMMANDS.PICK)
+  .argument('[files...]', 'Files to stage (opens interactive selector if not provided)')
   .description('Interactively select unstaged changes to stage.')
-  .action(() => {
-    pick();
+  .action((files: string[]) => {
+    pick(files);
+  });
+
+program
+  .command(COMMANDS.DROP)
+  .argument('[files...]', 'Files to unstage (opens interactive selector if not provided)')
+  .description('Interactively select staged changes to unstage.')
+  .action((files: string[]) => {
+    drop(files);
   });
 
 program.parse();

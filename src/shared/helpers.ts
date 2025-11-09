@@ -35,11 +35,11 @@ export async function safePrompt<T>(promptFn: () => Promise<T>): Promise<T> {
 }
 
 /**
- * Shows a generic confirmation prompt with Yes/No options
- * @returns True if user confirms, false otherwise
+ * Shows a confirmation prompt and exits if user declines
  */
-export async function genericConfirmPrompt(): Promise<boolean | null> {
-  return safePrompt(() =>
+export async function confirmOrExit(): Promise<void> {
+  nl();
+  const confirmed = await safePrompt(() =>
     confirm({
       message: 'Confirm?',
       default: false,
@@ -50,11 +50,53 @@ export async function genericConfirmPrompt(): Promise<boolean | null> {
       },
     })
   );
+
+  if (!confirmed) {
+    process.exit(EXIT.SUCCESS);
+  }
 }
 
 // =============================================================================
 // GIT OPERATIONS
 // =============================================================================
+
+/**
+ * Ensures at least one commit exists in the repository
+ * Logs warning and exits if no commits found
+ */
+export async function ensureCommitsExist(): Promise<void> {
+  const hasCommits = await execa('git', ['rev-parse', 'HEAD'], { reject: false });
+  if (hasCommits.exitCode !== EXIT.SUCCESS) {
+    console.log(chalk.yellow('No commits found. Create an initial commit first.'));
+    process.exit(EXIT.SUCCESS);
+  }
+}
+
+/**
+ * Ensures at least one branch exists in the repository
+ * Logs warning and exits if no branches found
+ * @param branches - Array of branches
+ */
+export function ensureBranchesExist(branches: Awaited<ReturnType<typeof getAllBranches>>): void {
+  if (branches.length === 0) {
+    console.log(chalk.yellow('No branches found. Create an initial commit first.'));
+    process.exit(EXIT.SUCCESS);
+  }
+}
+
+/**
+ * Ensures a git remote is configured
+ * Logs warning and exits if no remote found
+ */
+export async function ensureRemoteExists(): Promise<void> {
+  const remoteResult = await execa('git', ['remote'], { reject: false });
+  if (remoteResult.exitCode !== EXIT.SUCCESS || !remoteResult.stdout.trim()) {
+    console.log(
+      chalk.yellow('No remote configured. Add a remote first with: git remote add origin <url>')
+    );
+    process.exit(EXIT.SUCCESS);
+  }
+}
 
 /**
  * Retrieves all git branches in the current repository

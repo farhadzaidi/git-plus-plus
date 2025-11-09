@@ -3,8 +3,9 @@ import { input } from '@inquirer/prompts';
 import chalk from 'chalk';
 import { CHANGE_POSITION } from '@/shared/constants';
 import {
-  genericConfirmPrompt,
+  confirmOrExit,
   safePrompt,
+  ensureRemoteExists,
   processCommand,
   nl,
   parseGitChanges,
@@ -12,6 +13,8 @@ import {
 } from '@/shared/helpers';
 
 export async function execute(message?: string): Promise<void> {
+  await ensureRemoteExists();
+
   // Stage all changes to resolve any conflicted states (e.g. delete + create could be rename)
   const addResult = await execa('git', ['add', '.'], { reject: false });
   processCommand(addResult, false);
@@ -32,9 +35,7 @@ export async function execute(message?: string): Promise<void> {
   displayGroupedChanges(parsedChanges);
 
   // Prompt user for confirmation
-  nl();
-  const confirm = await genericConfirmPrompt();
-  if (!confirm) return;
+  await confirmOrExit();
 
   // Prompt user for the commit message if they didn't provide one
   let commitMessage = message;

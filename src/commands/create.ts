@@ -1,9 +1,11 @@
 import { execa } from 'execa';
 import { input } from '@inquirer/prompts';
 import chalk from 'chalk';
-import { safePrompt, processCommand } from '@/shared/helpers';
+import { safePrompt, ensureCommitsExist, processCommand } from '@/shared/helpers';
 
 export async function execute(branch?: string): Promise<void> {
+  await ensureCommitsExist();
+
   // If the branch is provided, create it
   if (branch) {
     await createBranch(branch);

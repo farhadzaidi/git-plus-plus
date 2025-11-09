@@ -3,14 +3,17 @@ import { select, input } from '@inquirer/prompts';
 import chalk from 'chalk';
 import {
   safePrompt,
-  genericConfirmPrompt,
+  confirmOrExit,
   getAllBranches,
+  ensureBranchesExist,
   processCommand,
   nl,
 } from '@/shared/helpers';
 
 export async function execute(): Promise<void> {
   const allBranches = await getAllBranches();
+  ensureBranchesExist(allBranches);
+
   const selectedBranch = await safePrompt(() =>
     select({
       message: chalk.cyan('Select a branch (Ctrl + C to cancel)'),
@@ -46,11 +49,10 @@ export async function execute(): Promise<void> {
 
   console.log(
     chalk.green(
-      `\n\t${chalk.cyan.bold(selectedBranch)} ${chalk.green('-->')} ${chalk.magenta.bold(newName)}\n`
+      `\n\t${chalk.cyan.bold(selectedBranch)} ${chalk.green('-->')} ${chalk.magenta.bold(newName)}`
     )
   );
-  const confirm = await genericConfirmPrompt();
-  if (!confirm) return;
+  await confirmOrExit();
 
   const result = await execa('git', ['branch', '-m', selectedBranch, newName], { reject: false });
   processCommand(result);

@@ -1,10 +1,12 @@
 import { execa } from 'execa';
 import { select } from '@inquirer/prompts';
 import chalk from 'chalk';
-import { safePrompt, getAllBranches, processCommand } from '@/shared/helpers';
+import { safePrompt, getAllBranches, ensureBranchesExist, processCommand } from '@/shared/helpers';
 
 export async function execute(branch?: string): Promise<void> {
   const allBranches = await getAllBranches();
+  ensureBranchesExist(allBranches);
+
   const currentBranch = allBranches.find((b) => b.isCurrent)!.name;
 
   if (branch === currentBranch) {
