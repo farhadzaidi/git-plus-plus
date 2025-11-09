@@ -82,9 +82,9 @@ export async function execute(message?: string): Promise<void> {
   if (!confirm) return;
 
   // Prompt user for the commit message if they didn't provide one
-  nl();
   let commitMessage = message;
   if (!commitMessage) {
+    nl();
     commitMessage = await safePrompt(() =>
       input({
         message: chalk.cyan('Enter a commit message (Ctrl + C to cancel)\n'),

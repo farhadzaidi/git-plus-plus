@@ -44,9 +44,10 @@ export async function execute(): Promise<void> {
     })
   );
 
-  nl();
   console.log(
-    chalk.green(`\t${chalk.green(selectedBranch)} ${chalk.cyan('-->')} ${chalk.magenta(newName)}\n`)
+    chalk.green(
+      `\n\t${chalk.green(selectedBranch)} ${chalk.cyan('-->')} ${chalk.magenta(newName)}\n`
+    )
   );
   const confirm = await genericConfirmPrompt();
   if (!confirm) return;

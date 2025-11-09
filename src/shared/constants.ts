@@ -9,8 +9,8 @@ export const COMMANDS = {
   GOTO: 'goto',
   CREATE: 'create',
   PUBLISH: 'publish',
-  DELETE: 'delete', // remove one or more branches - use multiselect and confirm
-  RENAME: 'rename', // rename a branch - use select, input, and confirm
+  DELETE: 'delete',
+  RENAME: 'rename',
   TRACK: 'track', // auto set upstream (git push -u origin HEAD)
   UNCOMMIT: 'uncommit', // safe uncommit (git reset --soft HEAD~1)
   PICK: 'pick', // choose from unstage (including untracked) files to stage - multiselect and confirm
