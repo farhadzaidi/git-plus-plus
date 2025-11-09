@@ -4,6 +4,7 @@ import { Command } from 'commander';
 
 import { GPP, COMMANDS } from '@/shared/constants';
 import {
+  doctor,
   rebuild,
   goto,
   create,
@@ -19,7 +20,14 @@ import {
 
 const program = new Command();
 
-program.name(GPP).description('Git++ - TBD');
+program
+  .name(GPP)
+  .description('An interactive extension of Git for a smoother command-line experience.');
+
+program
+  .command(COMMANDS.DOCTOR)
+  .description('Checks Git++ installation and configuration health.')
+  .action(doctor);
 
 program
   .command(COMMANDS.REBUILD)
@@ -98,7 +106,7 @@ program
 
 program
   .command(COMMANDS.WIPE)
-  .description('Discards all uncommitted changes (git reset --hard).')
+  .description('Discards all uncommitted changes.')
   .action(() => {
     wipe();
   });

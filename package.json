@@ -2,13 +2,32 @@
   "name": "git-plus-plus",
   "version": "1.0.0",
   "type": "module",
+  "author": "Syed F. Zaidi",
+  "license": "MIT",
+  "description": "Interactive Git extension with intuitive commands for branch management, staging, and committing",
+  "keywords": [
+    "git",
+    "cli",
+    "interactive",
+    "branch",
+    "commit",
+    "stage",
+    "workflow",
+    "developer-tools"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/farhadzaidi/git-plus-plus.git"
+  },
+  "homepage": "https://github.com/farhadzaidi/git-plus-plus#readme",
+  "packageManager": "pnpm@10.19.0",
   "bin": {
-    "gpp": "dist/bin/gpp.js"
+    "gpp": "dist/gpp.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "postinstall.js"
   ],
-  "description": "Extended Git Command Set",
   "scripts": {
     "dev": "tsx ./bin/gpp.ts",
     "build": "tsup ./bin/gpp.ts --format esm --clean",
@@ -16,13 +35,9 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "postinstall": "tsx ./install",
+    "postinstall": "node ./postinstall.js",
     "prepublishOnly": "pnpm build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.19.0",
   "dependencies": {
     "@inquirer/prompts": "^7.9.0",
     "chalk": "^5.6.2",

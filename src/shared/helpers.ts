@@ -1,3 +1,7 @@
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+import ini from 'ini';
 import chalk from 'chalk';
 import { confirm, select } from '@inquirer/prompts';
 import { execa } from 'execa';
@@ -10,6 +14,7 @@ import {
   CHANGE_POSITION,
   ParsedChanges,
   ChangePosition,
+  IniConfig,
 } from '@/shared/constants';
 
 type Branch = {
@@ -161,6 +166,35 @@ export async function ensureRemoteExists(): Promise<void> {
 }
 
 /**
+ * Gets the path to the .gitconfig file
+ * @returns Absolute path to .gitconfig
+ */
+export function getGitConfigPath(): string {
+  return path.join(os.homedir(), '.gitconfig');
+}
+
+/**
+ * Reads and parses the .gitconfig file
+ * @returns Parsed gitconfig object, or empty object if file doesn't exist
+ */
+export function readGitConfig(): IniConfig {
+  const gitConfigPath = getGitConfigPath();
+  if (!fs.existsSync(gitConfigPath)) {
+    return {};
+  }
+  return ini.parse(fs.readFileSync(gitConfigPath, 'utf-8'));
+}
+
+/**
+ * Writes a gitconfig object to the .gitconfig file
+ * @param config - The config object to write
+ */
+export function writeGitConfig(config: IniConfig): void {
+  const gitConfigPath = getGitConfigPath();
+  fs.writeFileSync(gitConfigPath, ini.stringify(config));
+}
+
+/**
  * Processes the result of a command execution and handles errors
  * @param result - Object containing stdout, stderr, and exitCode from command execution
  * @param logStdOut - Whether to log stdout to console (default: true)
@@ -222,7 +256,7 @@ export function parseGitChanges(status: string, position: ChangePosition): Parse
     // Handle merge conflicts
     if (line[0] === 'U' || line[1] === 'U') {
       console.log(chalk.yellow('Merge conflict(s) detected. Please resolve before continuing.'));
-      process.exit(EXIT.SUCCESS);
+      process.exit(EXIT.FAILURE);
     }
 
     // Validate and map status code

@@ -15,5 +15,5 @@
     "strict": true,
     "resolveJsonModule": true
   },
-  "include": ["bin/**/*.ts", "src/**/*.ts", "install.ts"]
+  "include": ["bin/**/*.ts", "src/**/*.ts",]
 }

@@ -4,6 +4,8 @@ import chalk, { ChalkInstance } from 'chalk';
 // APPLICATION CONSTANTS
 // =============================================================================
 
+export type IniConfig = { [key: string]: any };
+
 export const GPP = 'gpp';
 
 export const EXIT = {
@@ -12,10 +14,7 @@ export const EXIT = {
 };
 
 export const COMMANDS = {
-  HEALTH: 'health', // ensures gpp
-  CONFIG: 'config', // show currently supported commands
-  VERISON: 'version', // show version
-  UPDATE: 'update', // reinstall npm package globally
+  DOCTOR: 'doctor',
   REBUILD: 'rebuild',
   GOTO: 'goto',
   CREATE: 'create',
@@ -29,9 +28,23 @@ export const COMMANDS = {
   WIPE: 'wipe',
 };
 
-export const GITCONFIG_ALIASES = {
-  [COMMANDS.GOTO]: `!${GPP} ${COMMANDS.GOTO}`,
-};
+// Git operation commands (non-administrative)
+export const GIT_COMMANDS = [
+  COMMANDS.GOTO,
+  COMMANDS.CREATE,
+  COMMANDS.PUBLISH,
+  COMMANDS.DELETE,
+  COMMANDS.RENAME,
+  COMMANDS.TRACK,
+  COMMANDS.UNCOMMIT,
+  COMMANDS.PICK,
+  COMMANDS.DROP,
+  COMMANDS.WIPE,
+];
+
+export const GITCONFIG_ALIASES = Object.fromEntries(
+  GIT_COMMANDS.map((cmd) => [cmd, `!${GPP} ${cmd}`])
+);
 
 // =============================================================================
 // GIT CHANGE TYPES
