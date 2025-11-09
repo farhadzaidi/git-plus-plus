@@ -4,8 +4,9 @@ import os from 'os';
 import ini from 'ini';
 import chalk from 'chalk';
 
-import { GPP, GITCONFIG_ALIASES, COMMANDS } from '@/shared/constants';
-import type { IniConfig } from '@/shared/types';
+import { GPP, GITCONFIG_ALIASES } from '@/shared/constants';
+
+type IniConfig = { [key: string]: any };
 
 export async function execute(): Promise<void> {
 	// Retrieve path to .gitconfig file (ini format)

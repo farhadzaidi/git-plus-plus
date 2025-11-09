@@ -34,13 +34,16 @@ export function processCommand({
 	stdout?: string;
 	stderr?: string;
 	exitCode?: number;
-}) {
-	if (stdout) console.log(stdout.trim());
-	if (stderr) console.log(stderr.trim());
-
-	// Terminate process on failed commands
+}, logStdOut = true) {
+	// If the command failed, print the error message and terminate
 	if (exitCode && exitCode !== EXIT.SUCCESS) {
+		if (stderr) console.log(stderr.trim());
 		process.exit(exitCode);
+	}
+
+	// If there is any output, print it unless otherwise specified
+	if (logStdOut && stdout) {
+		console.log(stdout.trim())
 	}
 }
 
