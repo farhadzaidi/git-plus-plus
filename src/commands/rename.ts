@@ -13,7 +13,7 @@ export async function execute(): Promise<void> {
   const allBranches = await getAllBranches();
   const selectedBranch = await safePrompt(() =>
     select({
-      message: chalk.cyan('Select a branch (Ctrl + C to cancel): '),
+      message: chalk.cyan('Select a branch (Ctrl + C to cancel)'),
       choices: allBranches.map((b) => ({
         name: b.isCurrent
           ? `${chalk.green('●')} ${b.name} ${chalk.dim.italic('(current)')}`

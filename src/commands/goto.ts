@@ -24,7 +24,7 @@ export async function execute(branch?: string): Promise<void> {
   // If the branch isn't provided, get all branches and prompt user to select one
   const selectedBranch = await safePrompt(() =>
     select({
-      message: chalk.cyan('Select a branch (Ctrl + C to cancel): '),
+      message: chalk.cyan('Select a branch (Ctrl + C to cancel)'),
       choices: allBranches.map((b) => ({
         name: b.isCurrent
           ? `${chalk.green('●')} ${b.name} ${chalk.dim.italic('(current)')}`

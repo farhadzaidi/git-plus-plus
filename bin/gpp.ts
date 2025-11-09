@@ -12,6 +12,7 @@ import {
   rename,
   track,
   uncommit,
+  pick,
 } from '@/commands';
 
 const program = new Command();
@@ -75,6 +76,13 @@ program
   .description('Undoes the last commit, keeping changes staged.')
   .action(() => {
     uncommit();
+  });
+
+program
+  .command(COMMANDS.PICK)
+  .description('Interactively select unstaged changes to stage.')
+  .action(() => {
+    pick();
   });
 
 program.parse();

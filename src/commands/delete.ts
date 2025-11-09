@@ -20,7 +20,7 @@ export async function execute(branches: string[]): Promise<void> {
   const allBranches = await getAllBranches();
   const branchesToDelete = await safePrompt(() =>
     checkbox({
-      message: chalk.cyan('Select one or more branches to delete (Ctrl + C to cancel): '),
+      message: chalk.cyan('Select one or more branches to delete (Ctrl + C to cancel)'),
       choices: allBranches.map((b) => ({
         name: b.isCurrent ? `${b.name} (current)` : b.name,
         value: b.name,
