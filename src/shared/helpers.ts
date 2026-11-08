@@ -7,6 +7,8 @@ import { confirm, select } from '@inquirer/prompts';
 import { execa } from 'execa';
 import {
   EXIT,
+  GIT_COMMANDS,
+  GITCONFIG_ALIASES,
   ChangeStatus,
   CHANGE_STATUS_MAPPING,
   CHANGE_STATUS_COLORS,
@@ -15,11 +17,15 @@ import {
   ParsedChanges,
   ChangePosition,
   IniConfig,
+  Worktree,
+  BRANCH_REF_PREFIX,
+  DETACHED_LABEL,
 } from '@/shared/constants';
 
 type Branch = {
   name: string;
   isCurrent: boolean;
+  isInWorktree: boolean;
 };
 
 // =============================================================================
@@ -80,6 +86,7 @@ export async function promptForBranch(branches: Branch[]): Promise<string> {
           ? `${chalk.green('●')} ${b.name} ${chalk.dim.italic('(current)')}`
           : `  ${b.name}`,
         value: b.name,
+        disabled: b.isInWorktree && '(in another worktree)',
       })),
       default: branches.find((b) => b.isCurrent)?.name,
       theme: {
@@ -104,13 +111,17 @@ export async function getAllBranches(): Promise<Branch[]> {
   try {
     const { stdout } = await execa('git', ['--no-pager', 'branch']);
 
-    return stdout.split('\n').map((line) => {
-      line = line.trim();
-      return {
-        name: line.replace(/^\*\s*/, ''),
-        isCurrent: line.startsWith('*'),
-      };
-    });
+    return stdout
+      .split('\n')
+      .filter(Boolean)
+      .map((line) => {
+        line = line.trim();
+        return {
+          name: line.replace(/^[*+]\s*/, ''),
+          isCurrent: line.startsWith('*'),
+          isInWorktree: line.startsWith('+'),
+        };
+      });
   } catch (error) {
     console.log(chalk.red('Error: Failed to retrieve branches.'));
     process.exit(EXIT.FAILURE);
@@ -152,6 +163,22 @@ export function ensureBranchesExist(branches: Branch[]): void {
 }
 
 /**
+ * Checks if a branch exists in the repository
+ * @param branch - The branch name to check
+ * @returns True if the branch exists
+ */
+export async function branchExists(branch: string): Promise<boolean> {
+  const result = await execa(
+    'git',
+    ['rev-parse', '--verify', '--quiet', `${BRANCH_REF_PREFIX}${branch}`],
+    {
+      reject: false,
+    }
+  );
+  return result.exitCode === EXIT.SUCCESS;
+}
+
+/**
  * Ensures a git remote is configured
  * Logs warning and exits if no remote found
  */
@@ -165,12 +192,150 @@ export async function ensureRemoteExists(): Promise<void> {
   }
 }
 
+// =============================================================================
+// WORKTREE OPERATIONS
+// =============================================================================
+
+/**
+ * Retrieves all git worktrees by parsing `git worktree list --porcelain`
+ * @returns Array of Worktree objects
+ */
+export async function getAllWorktrees(): Promise<Worktree[]> {
+  const result = await execa('git', ['worktree', 'list', '--porcelain'], { reject: false });
+  processCommand(result, false);
+
+  const output = result.stdout.trim();
+  if (!output) return [];
+
+  const toplevelResult = await execa('git', ['rev-parse', '--show-toplevel'], { reject: false });
+  const currentRoot = toplevelResult.stdout.trim();
+  const worktrees: Worktree[] = [];
+  const blocks = output.split('\n\n');
+
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
+    const lines = block.split('\n');
+
+    let wtPath = '';
+    let head = '';
+    let branch = '';
+    let isBare = false;
+
+    for (const line of lines) {
+      if (line.startsWith('worktree ')) {
+        wtPath = line.slice('worktree '.length);
+      } else if (line.startsWith('HEAD ')) {
+        head = line.slice('HEAD '.length);
+      } else if (line.startsWith('branch ')) {
+        branch = line.slice('branch '.length).replace(BRANCH_REF_PREFIX, '');
+      } else if (line === 'bare') {
+        isBare = true;
+      }
+    }
+
+    if (isBare) continue;
+
+    worktrees.push({
+      path: wtPath,
+      head,
+      branch,
+      isCurrent: path.resolve(wtPath) === path.resolve(currentRoot),
+      isMain: i === 0,
+    });
+  }
+
+  return worktrees;
+}
+
+/**
+ * Finds a worktree by branch name or directory name
+ * @param worktrees - Array of worktrees
+ * @param name - Branch name or directory name to match
+ * @returns The matching worktree, or undefined
+ */
+export function findWorktree(worktrees: Worktree[], name: string): Worktree | undefined {
+  return worktrees.find((wt) => wt.branch === name || wt.path.endsWith(`/${name}`));
+}
+
+/**
+ * Ensures at least one linked worktree exists (besides the main one)
+ * @param worktrees - Array of worktrees
+ */
+export function ensureWorktreesExist(worktrees: Worktree[]): void {
+  if (worktrees.length <= 1) {
+    console.log(chalk.yellow('No linked worktrees found.'));
+    process.exit(EXIT.SUCCESS);
+  }
+}
+
+/**
+ * Prompts user to select a worktree from a list
+ * @param worktrees - Array of worktree objects
+ * @param options - Filter and message configuration
+ * @returns The selected Worktree object
+ */
+export async function promptForWorktree(
+  worktrees: Worktree[],
+  options: {
+    exclude?: (wt: Worktree) => boolean;
+    message?: string;
+  } = {}
+): Promise<Worktree> {
+  const { exclude, message } = options;
+  const filtered = exclude ? worktrees.filter((wt) => !exclude(wt)) : worktrees;
+
+  if (filtered.length === 0) {
+    console.log(chalk.yellow('No worktrees available to select.'));
+    process.exit(EXIT.SUCCESS);
+  }
+
+  return safePrompt(() =>
+    select({
+      message: message || chalk.cyan('Select a worktree (Ctrl + C to cancel)'),
+      choices: filtered.map((wt) => ({
+        name: wt.isCurrent
+          ? `${chalk.green('●')} ${wt.branch || chalk.dim(DETACHED_LABEL)} ${chalk.dim(wt.path)} ${chalk.dim.italic('(current)')}`
+          : `  ${wt.branch || chalk.dim(DETACHED_LABEL)} ${chalk.dim(wt.path)}`,
+        value: wt,
+      })),
+      theme: {
+        style: {
+          highlight: (text: string) => chalk.magenta.bold(text),
+          answer: (text: string) => chalk.green(text),
+        },
+      },
+    })
+  );
+}
+
+/**
+ * Gets the root path of the main worktree
+ * @returns Absolute path to the main worktree root
+ */
+export async function getMainWorktreeRoot(): Promise<string> {
+  const result = await execa('git', ['worktree', 'list', '--porcelain'], { reject: false });
+  processCommand(result, false);
+
+  const firstLine = result.stdout.split('\n')[0];
+  return firstLine.slice('worktree '.length);
+}
+
 /**
  * Gets the path to the .gitconfig file
  * @returns Absolute path to .gitconfig
  */
 export function getGitConfigPath(): string {
   return path.join(os.homedir(), '.gitconfig');
+}
+
+/**
+ * Checks if all Git++ aliases are correctly configured in .gitconfig
+ * @returns True if all aliases match expected values
+ */
+export function aliasesAreValid(): boolean {
+  const config = readGitConfig();
+  const aliases = config.alias || {};
+  return GIT_COMMANDS.every((cmd) => aliases[cmd] === GITCONFIG_ALIASES[cmd]);
 }
 
 /**
@@ -183,15 +348,6 @@ export function readGitConfig(): IniConfig {
     return {};
   }
   return ini.parse(fs.readFileSync(gitConfigPath, 'utf-8'));
-}
-
-/**
- * Writes a gitconfig object to the .gitconfig file
- * @param config - The config object to write
- */
-export function writeGitConfig(config: IniConfig): void {
-  const gitConfigPath = getGitConfigPath();
-  fs.writeFileSync(gitConfigPath, ini.stringify(config));
 }
 
 /**

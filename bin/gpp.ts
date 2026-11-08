@@ -2,7 +2,9 @@
 
 import { Command } from 'commander';
 
-import { GPP, COMMANDS } from '@/shared/constants';
+import chalk from 'chalk';
+import { GPP, COMMANDS, ADMIN_COMMANDS } from '@/shared/constants';
+import { aliasesAreValid } from '@/shared/helpers';
 import {
   doctor,
   rebuild,
@@ -17,6 +19,7 @@ import {
   drop,
   wipe,
 } from '@/commands';
+import { registerTreeCommands } from './tree';
 
 const program = new Command();
 
@@ -110,5 +113,14 @@ program
   .action(() => {
     wipe();
   });
+
+registerTreeCommands(program);
+
+// Auto-fix aliases if missing or outdated (admin commands handle aliases themselves)
+const isAdminCommand = ADMIN_COMMANDS.includes(process.argv[2]);
+if (!isAdminCommand && !aliasesAreValid()) {
+  console.log(chalk.yellow('Invalid alias configuration detected. Rebuilding...'));
+  await rebuild();
+}
 
 program.parse();

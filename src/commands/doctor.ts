@@ -1,8 +1,7 @@
-import fs from 'fs';
 import { execa } from 'execa';
 import chalk from 'chalk';
-import { GPP, EXIT, GIT_COMMANDS, GITCONFIG_ALIASES, COMMANDS } from '@/shared/constants';
-import { getGitConfigPath, readGitConfig } from '@/shared/helpers';
+import { GPP, EXIT, COMMANDS } from '@/shared/constants';
+import { aliasesAreValid } from '@/shared/helpers';
 
 export async function execute(): Promise<void> {
   console.log(chalk.cyan.bold('\nRunning Git++ health checks...\n'));
@@ -63,7 +62,8 @@ async function checkGppInPath(): Promise<boolean> {
   process.stdout.write(chalk.dim('Checking if gpp is in PATH... '));
 
   try {
-    const result = await execa('gpp', ['--help'], { reject: false });
+    // Admin commands skip the alias auto-fix, so this can't mask the alias check below
+    const result = await execa(GPP, [COMMANDS.DOCTOR, '--help'], { reject: false });
     if (result.exitCode === EXIT.SUCCESS) {
       console.log(chalk.green('✓'));
       return true;
@@ -79,33 +79,12 @@ async function checkGppInPath(): Promise<boolean> {
 async function checkGitConfigAliases(): Promise<boolean> {
   process.stdout.write(chalk.dim('Checking git config aliases... '));
 
-  const gitConfigPath = getGitConfigPath();
-
-  if (!fs.existsSync(gitConfigPath)) {
-    console.log(chalk.yellow('⚠ (no .gitconfig found)'));
-    return false;
-  }
-
   try {
-    const config = readGitConfig();
-    const aliases = config.alias || {};
-
-    let allCorrect = true;
-    const missingOrIncorrect: string[] = [];
-
-    for (const cmd of GIT_COMMANDS) {
-      const expectedAlias = GITCONFIG_ALIASES[cmd];
-      if (aliases[cmd] !== expectedAlias) {
-        allCorrect = false;
-        missingOrIncorrect.push(cmd);
-      }
-    }
-
-    if (allCorrect) {
+    if (aliasesAreValid()) {
       console.log(chalk.green('✓'));
       return true;
     } else {
-      console.log(chalk.yellow(`⚠ (${missingOrIncorrect.length} alias(es) missing or incorrect)`));
+      console.log(chalk.yellow('⚠ (aliases missing or incorrect)'));
       return false;
     }
   } catch (error) {

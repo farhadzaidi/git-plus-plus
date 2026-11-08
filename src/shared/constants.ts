@@ -13,6 +13,10 @@ export const EXIT = {
   FAILURE: 1,
 };
 
+export const BRANCH_REF_PREFIX = 'refs/heads/';
+
+export const DETACHED_LABEL = '(detached)';
+
 export const COMMANDS = {
   DOCTOR: 'doctor',
   REBUILD: 'rebuild',
@@ -26,7 +30,18 @@ export const COMMANDS = {
   PICK: 'pick',
   DROP: 'drop',
   WIPE: 'wipe',
+  TREE: {
+    _NAME: 'tree',
+    CREATE: 'create',
+    LIST: 'list',
+    GOTO: 'goto',
+    DELETE: 'delete',
+    DETACH: 'detach',
+  },
 };
+
+// Administrative commands (manage aliases themselves)
+export const ADMIN_COMMANDS = [COMMANDS.DOCTOR, COMMANDS.REBUILD];
 
 // Git operation commands (non-administrative)
 export const GIT_COMMANDS = [
@@ -40,6 +55,7 @@ export const GIT_COMMANDS = [
   COMMANDS.PICK,
   COMMANDS.DROP,
   COMMANDS.WIPE,
+  COMMANDS.TREE._NAME,
 ];
 
 export const GITCONFIG_ALIASES = Object.fromEntries(
@@ -90,3 +106,15 @@ export const CHANGE_STATUS_ORDER: ChangeStatus[] = [
   ChangeStatus.DELETED,
   ChangeStatus.RENAMED,
 ];
+
+// =============================================================================
+// WORKTREE TYPES
+// =============================================================================
+
+export type Worktree = {
+  path: string;
+  head: string;
+  branch: string;
+  isCurrent: boolean;
+  isMain: boolean;
+};

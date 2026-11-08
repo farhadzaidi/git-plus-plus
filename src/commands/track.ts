@@ -1,6 +1,12 @@
 import chalk from 'chalk';
 import { execa } from 'execa';
-import { getAllBranches, ensureBranchesExist, ensureRemoteExists, processCommand } from '@/shared/helpers';
+import { BRANCH_REF_PREFIX } from '@/shared/constants';
+import {
+  getAllBranches,
+  ensureBranchesExist,
+  ensureRemoteExists,
+  processCommand,
+} from '@/shared/helpers';
 
 export async function execute(branch?: string): Promise<void> {
   // Get the current branch
@@ -20,9 +26,13 @@ export async function execute(branch?: string): Promise<void> {
   );
 
   processCommand(
-    await execa('git', ['config', `branch.${currentBranch}.merge`, `refs/heads/${remoteBranch}`], {
-      reject: false,
-    })
+    await execa(
+      'git',
+      ['config', `branch.${currentBranch}.merge`, `${BRANCH_REF_PREFIX}${remoteBranch}`],
+      {
+        reject: false,
+      }
+    )
   );
 
   console.log(

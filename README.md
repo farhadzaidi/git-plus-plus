@@ -16,6 +16,15 @@ After installation, Git++ configures Git aliases so you can run commands such as
 
 > Note: Administrative commands like `gpp doctor` and `gpp rebuild` must be invoked using `gpp`. All other subcommands can be run as either `gpp <command>` or `git <command>`.
 
+### pnpm
+
+```bash
+pnpm install -g git-plus-plus
+gpp rebuild
+```
+
+`pnpm` blocks postinstall scripts by default, so you'll need to run `gpp rebuild` once after installing to set up Git aliases. That said, Git++ automatically detects and fixes missing aliases on any run, so this step isn't strictly necessary.
+
 ---
 
 ## Quick Start
@@ -117,6 +126,33 @@ Useful for adjusting commit messages or adding missing files.
 
 Discard all uncommitted changes and remove untracked files.  
 This command is **destructive** and requires typing `confirm` to proceed.
+
+---
+
+### Worktree Operations
+
+#### `git tree create [name] [branch]`
+
+Create a worktree in a sibling directory of the main checkout, on `branch` (defaults to `name`).  
+Creates the branch if it doesn't exist, initializes submodules, and offers to copy untracked and ignored files (such as `.env`).
+
+#### `git tree list`
+
+List all worktrees, marking the main and current ones.
+
+#### `git tree goto [name]`
+
+Open a shell in the specified worktree. Interactive selector if none specified.  
+Running `goto` again inside that shell switches it to another worktree; type `exit` to leave.
+
+#### `git tree delete [names...]`
+
+Remove one or more worktrees and their branches. Interactive multi-select if none specified.  
+Displays a summary, flags uncommitted changes, and requires confirmation.
+
+#### `git tree detach`
+
+Detach the current worktree from its branch, freeing the branch for use elsewhere.
 
 ---
 
